@@ -1,6 +1,7 @@
 const express = require("express")
 const userRoute = express.Router()
-const UserModel = require('../models/user-schema')
+const UserModel = require("../models/user-schema")
+const userSchema = require("../models/user-schema")
 const accounts = [
   { username: "admin", password: "123456" },
   { username: "user", password: "123456" },
@@ -14,8 +15,29 @@ const accounts = [
   { username: "qtufew", password: "oumwyl2s" },
 ]
 
-userRoute.get("/", function (req, res) {
-  return res.json(accounts)
+userRoute.get("/", async function (req, res) {
+  const keyWord = req.query.keyWord
+  const { page = 1, limit = 2 } = req.query
+
+  // tim ten den tu query string
+  let condition = {}
+  if (keyWord && keyWord.length > 0) {
+    condition.username = { $regex: keyWord, $options: "i" }
+  }
+
+  // pagination
+  const userlists = await UserModel.find(condition)
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .exec()
+
+  const count = await UserModel.countDocuments(condition)
+
+  return res.json({
+    userlists,
+    totalPages: Math.ceil(count / limit),
+    currentPage: page,
+  })
 })
 
 /**
@@ -36,8 +58,8 @@ userRoute.post("/login", function (req, res) {
 })
 userRoute.post("/register", async function (req, res) {
   const { username, password, email } = req.body
-  await UserModel.create({ username: username, password: password, email: email })
-  return res.json({ message: "dang ky thanh cong" })
+  const created = await UserModel.create({ username: username, password: password, email: email })
+  return res.json({ message: "dang ky thanh cong", data: created })
 })
 
 /**
@@ -46,15 +68,18 @@ userRoute.post("/register", async function (req, res) {
 //  * old_pass
  * new_pass
  */
-userRoute.put("/:username", function (req, res) {
-  const { username } = req.params
-  const { password } = req.body
-  const userIndex = accounts.findIndex((account) => account.username === username)
-  if (userIndex > -1) {
-    accounts[userIndex].password = password
-    return res.status(200).json({mesage: "cap nhat password thanh cong"})
-  } else {
-    return res.status(400).json({mesage: "cap nhat password ko thanh cong"})
-  }
+userRoute.put("/:userID", async function (req, res) {
+  const { userID } = req.params
+  const { username, password } = req.body
+  const updateData = { username, password }
+  console.log(userID)
+  await UserModel.findOneAndUpdate({ _id: userID }, updateData)
+
+  return res.json("Da update")
+})
+userRoute.delete("/:userId", async function (req, res) {
+  const { userId } = req.params
+  await userSchema.deleteOne({ _id: userId })
+  return res.status(200).json({ mesage: "xóa thành công " })
 })
 module.exports = userRoute
