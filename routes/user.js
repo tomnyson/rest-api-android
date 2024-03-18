@@ -2,6 +2,7 @@ const express = require("express")
 const userRoute = express.Router()
 const UserModel = require("../models/user-schema")
 const userSchema = require("../models/user-schema")
+const {createUser, loginUser} = require('../controllers/user')
 const accounts = [
   { username: "admin", password: "123456" },
   { username: "user", password: "123456" },
@@ -25,14 +26,17 @@ userRoute.get("/", async function (req, res) {
     condition.username = { $regex: keyWord, $options: "i" }
   }
 
-  // pagination
+  // pagination có kèm theo đk
   const userlists = await UserModel.find(condition)
     .limit(limit * 1)
     .skip((page - 1) * limit)
     .exec()
 
+
+    // dem so luong document thoa dk
   const count = await UserModel.countDocuments(condition)
 
+  
   return res.json({
     userlists,
     totalPages: Math.ceil(count / limit),
@@ -46,20 +50,10 @@ userRoute.get("/", async function (req, res) {
  */
 
 userRoute.post("/login", function (req, res) {
-  const username = req.body.username
-  const password = req.body.password
-  for (let i = 0; i < accounts.length; i) {
-    if (username === accounts[i].username || password === accounts[i].password) {
-      res.json({ message: "dang nhap thanh cong" })
-    } else {
-      res.json({ message: "Loi" })
-    }
-  }
+  return loginUser(req, res)
 })
 userRoute.post("/register", async function (req, res) {
-  const { username, password, email } = req.body
-  const created = await UserModel.create({ username: username, password: password, email: email })
-  return res.json({ message: "dang ky thanh cong", data: created })
+  return createUser(req, res)
 })
 
 /**
