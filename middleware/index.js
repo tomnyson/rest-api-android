@@ -1,5 +1,7 @@
 var jwt = require('jsonwebtoken');
+const { URL } = require('url');
 const authMiddleware = (req, res, next) => {
+
     // var token = jwt.sign({
     //     data:  {
     //         'username': 'admin'
@@ -23,8 +25,41 @@ const authMiddleware = (req, res, next) => {
     }else {
         next();
     }
-
-   
+}
+const allowed_access = ['/api/user/login']
+const isPassUrl =(url) => {
+    for(let i = 0; i < allowed_access.length; i++) {
+        if(url.toLowerCase() === allowed_access[i]) {
+            return true;
+        }
+    }
+    console.log("pass url failed")
+    return false;
+}
+const authorizationJwt =  (req, res, next) => {
+    const token = req.headers.authorization;
+    const url = new URL(req.originalUrl, `http://${req.headers.host}`);
+    console.log(url.pathname)
+    if(isPassUrl(req.originalUrl)) {
+        return next()
+    }
+    
+    if(!token) {
+        return res.status(403).json({message: 'token is required'})
+    } 
+    const parseToken = token.split(' ')[1]
+    if(parseToken) {
+        jwt.verify(parseToken, process.env.SECRET_KEY, function(err, decoded) {
+            if(err) {
+                return res.status(403).json({message: 'token not correct'})
+            }
+            req.user = decoded.data;
+            console.log(decoded.data)
+            next();
+            
+          });
+    }
+ 
 }
 
-module.exports = authMiddleware;
+module.exports = {authMiddleware, authorizationJwt};

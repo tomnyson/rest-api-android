@@ -1,11 +1,18 @@
 const express = require('express');
 const userRoute = require('./user');
+const categoryRoute = require('./category');
 const apiRoute = express.Router();
-const authMiddleware = require('../middleware');
-apiRoute.use('/user',(req, res, next) => {
+
+const {authorizationJwt} = require('../middleware');
+// apiRoute.use('/user',(req, res, next) => {
+//     console.log('call user api route');
+//     next();
+// },authorizationJwt, userRoute);
+
+apiRoute.use('/category',(req, res, next) => {
     console.log('call user api route');
     next();
-},authMiddleware, userRoute);
+},authorizationJwt, categoryRoute);
 
 
 // apiRoute.use('/', function (req, res) {
