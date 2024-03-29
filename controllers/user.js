@@ -12,32 +12,65 @@ async function createUser(req, res, next) {
   return res.json({ message: "dang ky thanh cong", data: created })
 }
 
-async function loginUser(req, res, next) {
+async function loginDashboard(req, res, next) {
     const username = req.body.username
     const password = req.body.password
-    console.log("info user, authenzation", req.user)
-    const hash = '$2b$10$LDBqgK1RCzyK.wALkIRhFu584k.jvsG.SRLoSwNsH5zD86SNd7HVi'
-     
-    const user=await UserModel.findOne({ username: username,  }, {password: 0})
+    console.log(req.body)
+    const user=await UserModel.findOne({ username: username})
     if(!user) {
-        return res.status(400).json({ message: "tai khoan hoac mat khau sai"})
+        res.redirect('/dashboard')
     }
     else {
-        const result = await comparePassword(password, hash)
-    console.log(result)
+        console.log(user)
+        const result = await comparePassword(password, user.password)
     if(result == true) {
-      /**
-       * token: 
-       */
-        const token = generateToken({id: user._id, username: user.username})
-        return res.json({message: "dang nhap thanh cong", data:user, token:token})
+      req.session.user =  {
+        "username": username,
+        "role": user.role
+      }
+      res.redirect('/dashboard')
     }
     else{
-        return res.status(400).json({ message: "tai khoan hoac mat khau sai"})
+      res.redirect('/login')
     }
+  }
 }
+
+async function loginUser(req, res, next) {
+  const username = req.body.username
+  const password = req.body.password
+  console.log("info user, authenzation", req.user)
+  const hash = '$2b$10$LDBqgK1RCzyK.wALkIRhFu584k.jvsG.SRLoSwNsH5zD86SNd7HVi'
+   
+  const user=await UserModel.findOne({ username: username,  }, {password: 0})
+  if(!user) {
+      return res.status(400).json({ message: "tai khoan hoac mat khau sai"})
+  }
+  else {
+      const result = await comparePassword(password, hash)
+  console.log(result)
+  if(result == true) {
+    /**
+     * token: 
+     */
+      const token = generateToken({id: user._id, username: user.username})
+      return res.json({message: "dang nhap thanh cong", data:user, token:token})
+  }
+  else{
+      return res.status(400).json({ message: "tai khoan hoac mat khau sai"})
+  }
+}
+}
+
+async function logOut(req, res, next) {
+  req.session.destroy( 
+  )
+  res.redirect('/login')
+  
 }
 module.exports = {
   createUser,
-  loginUser
+  loginUser,
+  loginDashboard,
+  logOut
 }

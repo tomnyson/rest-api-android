@@ -28,6 +28,7 @@ const authMiddleware = (req, res, next) => {
 }
 const allowed_access = ['/api/user/login']
 const isPassUrl =(url) => {
+    console.log('isPassUrl',url)
     for(let i = 0; i < allowed_access.length; i++) {
         if(url.toLowerCase() === allowed_access[i]) {
             return true;
@@ -37,16 +38,17 @@ const isPassUrl =(url) => {
     return false;
 }
 const authorizationJwt =  (req, res, next) => {
+    console.log("call token here")
     const token = req.headers.authorization;
     const url = new URL(req.originalUrl, `http://${req.headers.host}`);
-    console.log(url.pathname)
-    if(isPassUrl(req.originalUrl)) {
+    if(isPassUrl(url.pathname)) {
         return next()
     }
     
     if(!token) {
         return res.status(403).json({message: 'token is required'})
     } 
+    console.log("call token here")
     const parseToken = token.split(' ')[1]
     if(parseToken) {
         jwt.verify(parseToken, process.env.SECRET_KEY, function(err, decoded) {
@@ -62,4 +64,11 @@ const authorizationJwt =  (req, res, next) => {
  
 }
 
-module.exports = {authMiddleware, authorizationJwt};
+const authMiddlewareView = (req, res, next) => {
+    if(!req.session.user) {
+        return res.redirect('/login')
+    }
+    next();
+};
+
+module.exports = {authMiddleware, authorizationJwt,authMiddlewareView};
