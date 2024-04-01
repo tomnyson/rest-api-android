@@ -7,6 +7,12 @@ const session = require('express-session');
 const {authMiddlewareView} = require('./middleware')
 const {loginDashboard, logOut} = require('./controllers/user')
 const app = express()
+const admin = require('firebase-admin');
+const serviceAccount = require("./serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -47,6 +53,36 @@ app.get('/login', async function (req, res){
   const users = await userSchema.find()
   res.render('dashboard/login',{users: users});
 })
+
+
+app.get('/login-sso', async function (req, res){
+  // render form
+  const users = await userSchema.find()
+  res.render('dashboard/login-sso',{users: users});
+})
+
+app.get('/register-sso', async function (req, res){
+  // render form
+  const users = await userSchema.find()
+  res.render('dashboard/register-sso',{users: users});
+})
+
+
+app.post('/register-sso', async function (req, res){
+  // render form
+  const {email, password} = req.body
+  try {
+    const user = await admin.auth().createUser({
+      email,
+      password,
+    });
+    res.status(201).send(`User ${user.uid} created successfully!`);
+  } catch (error) {
+    console.log(error)
+    res.status(500).send('Error creating user');
+  }
+})
+
 
 app.post('/dashboard/login', async function (req, res){
   // render form
