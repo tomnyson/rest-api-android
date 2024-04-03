@@ -1,6 +1,7 @@
 const express = require('express')
 const apiRoute = require('./routes');
 const userSchema = require('./models/user-schema');
+const mediaSchema = require('./models/media');
 require('dotenv').config()
 require('./models/mongo-provider')
 const session = require('express-session');
@@ -9,6 +10,8 @@ const {loginDashboard, logOut} = require('./controllers/user')
 const app = express()
 const admin = require('firebase-admin');
 const serviceAccount = require("./serviceAccountKey.json");
+
+
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -61,6 +64,23 @@ app.get('/login-sso', async function (req, res){
   res.render('dashboard/login-sso',{users: users});
 })
 
+
+app.get('/dashboard/media/delete', async function (req, res){
+  // render form
+  const {id} = req.query
+  await mediaSchema.deleteOne({ _id: id })
+  res.redirect('/dashboard/media');
+  // res.json({message: 'Delete'})
+})
+
+
+app.get('/dashboard/media', async function (req, res){
+  // render form
+  const media = await mediaSchema.find()
+  const users = await userSchema.find()
+  res.render('dashboard/media',{media: media});
+})
+
 app.get('/register-sso', async function (req, res){
   // render form
   const users = await userSchema.find()
@@ -83,6 +103,18 @@ app.post('/register-sso', async function (req, res){
   }
 })
 
+app.post('/login-sso', async function (req, res){
+  // render form
+  const {email, password} = req.body
+  try {
+    const userRecord = await admin.auth().signInWithEmailAndPassword(email, pass);
+    res.status(201).send(userRecord);
+  } catch (error) {
+    console.log(error)
+    res.status(500).send('Error creating user');
+  }
+})
+
 
 app.post('/dashboard/login', async function (req, res){
   // render form
@@ -93,6 +125,8 @@ app.get('/logout', async function (req, res){
   // render form
   return logOut(req, res)
 })
+
+
 
 // app.get('/api/current-time', function (req, res) {
 //     const currentTime = new Date();
