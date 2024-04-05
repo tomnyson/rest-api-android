@@ -1,5 +1,6 @@
 package com.example.apicall;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.myrecycleView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new MyAdapter(dataList);
+        adapter = new MyAdapter(getApplicationContext(), dataList);
         recyclerView.setAdapter(adapter);
 
         apiService.getData().enqueue(new Callback<List<ResponseModel>>() {

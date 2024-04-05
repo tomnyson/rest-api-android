@@ -10,6 +10,17 @@ public class ResponseModel {
     @SerializedName("description")
     private String description;
 
+    @SerializedName("image")
+    private String image;
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
     @SerializedName("price")
     private Float price;
 
@@ -56,6 +67,7 @@ public class ResponseModel {
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", price=" + price +
+                ", image=" + image +
                 '}';
     }
 }
