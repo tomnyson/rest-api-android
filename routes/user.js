@@ -2,7 +2,7 @@ const express = require("express")
 const userRoute = express.Router()
 const UserModel = require("../models/user-schema")
 const userSchema = require("../models/user-schema")
-const {createUser, loginUser, forgotUser} = require('../controllers/user')
+const {createUser, loginUser, forgotUser,updatePasswordWithOtpuUser} = require('../controllers/user')
 const accounts = [
   { username: "admin", password: "123456" },
   { username: "user", password: "123456" },
@@ -61,6 +61,10 @@ userRoute.post("/register", async function (req, res) {
   return createUser(req, res)
 })
 
+userRoute.post("/reset", async function (req, res) {
+  return updatePasswordWithOtpuUser(req, res)
+})
+
 /**
  * update password
  * nhap vao mat khau cu neu dung thi cap nhat
@@ -81,4 +85,5 @@ userRoute.delete("/:userId", async function (req, res) {
   await userSchema.deleteOne({ _id: userId })
   return res.status(200).json({ mesage: "xóa thành công " })
 })
+
 module.exports = userRoute
