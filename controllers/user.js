@@ -1,9 +1,15 @@
-const { hashPassword, comparePassword, generateToken } = require("../utils")
+const { hashPassword, comparePassword, generateToken, generateOTP } = require("../utils")
 const UserModel = require("../models/user-schema")
+const mailServices = require("../services/mail.services")
 async function createUser(req, res, next) {
   const { username, password, email } = req.body
   const hash_pass = await hashPassword(password)
   console.log(req.user)
+  const isExistEmail = await UserModel.findOne({ email: email})
+  console.log(isExistEmail)
+  if(isExistEmail) {
+    return res.status(400).json({ message: "email already exists"})
+  }
   const created = await UserModel.create({
     username: username,
     password: hash_pass,
@@ -68,9 +74,26 @@ async function logOut(req, res, next) {
   res.redirect('/login')
   
 }
+
+async function forgotUser(req, res, next) {
+  const email = req.body.email
+  const user= await UserModel.findOne({ email: email})
+  if(!user) {
+    return res.status(400).json({ message: "tai khoan ko tồn tại"})
+  }
+
+  const otp = generateOTP()
+  const content = `Please using this otp for reset passwor: <strong style="color: red, font-size: 20px">${otp}<strong>`
+  await mailServices.sendMail(email, 'otp reset password', content)
+  return res.json({message: `${otp}`})
+
+
+}
+
 module.exports = {
   createUser,
   loginUser,
   loginDashboard,
-  logOut
+  logOut,
+  forgotUser
 }

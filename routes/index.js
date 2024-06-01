@@ -9,7 +9,7 @@ const {authorizationJwt} = require('../middleware');
 apiRoute.use('/user',(req, res, next) => {
     console.log('call user api route');
     next();
-},authorizationJwt, userRoute);
+}, userRoute);
 
 apiRoute.use('/category',(req, res, next) => {
     next();

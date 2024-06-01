@@ -2,7 +2,7 @@ const express = require("express")
 const userRoute = express.Router()
 const UserModel = require("../models/user-schema")
 const userSchema = require("../models/user-schema")
-const {createUser, loginUser} = require('../controllers/user')
+const {createUser, loginUser, forgotUser} = require('../controllers/user')
 const accounts = [
   { username: "admin", password: "123456" },
   { username: "user", password: "123456" },
@@ -52,6 +52,11 @@ userRoute.get("/", async function (req, res) {
 userRoute.post("/login", function (req, res) {
   return loginUser(req, res)
 })
+
+userRoute.post("/forgot", function (req, res) {
+  return forgotUser(req, res)
+})
+
 userRoute.post("/register", async function (req, res) {
   return createUser(req, res)
 })

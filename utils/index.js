@@ -36,9 +36,25 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({storage:storage});
+
+const generateOTP = () => { 
+  
+  // Declare a digits variable  
+  // which stores all digits  
+  let digits =  
+'0123456789'; 
+  let OTP = ''; 
+  let len = digits.length 
+  for (let i = 0; i < 6; i++) { 
+      OTP += digits[Math.floor(Math.random() * len)]; 
+  } 
+  return OTP; 
+} 
+
 module.exports = {
   hashPassword,
   comparePassword,
   generateToken,
-  upload
+  upload,
+  generateOTP
 }
