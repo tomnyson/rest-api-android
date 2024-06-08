@@ -62,6 +62,20 @@ async function get(req, res, next) {
   return res.json(product)
 }
 
+async function getCartByUserId(req, res, next) {
+  try {
+    const {userId} = req.params
+    console.log('call order list request ')
+    const order = await cartModel.find({userId}).populate('userId').populate('items.productId')
+  
+    return res.json(order)
+  }catch (err) {
+    console.log(err)
+    return res.status(400)({err: "wrong order"})
+  }
+
+}
+
 async function getDetail(req, res, next) {
   const {id} = req.params
   const product = await productModel.find({_id: id}).populate('category', '-__v')
@@ -77,5 +91,6 @@ module.exports = {
   create: create,
   get: get,
   getDetail: getDetail,
-  saveOrder:saveOrder
+  saveOrder:saveOrder,
+  getCartByUserId: getCartByUserId
 }
