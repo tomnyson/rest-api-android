@@ -27,11 +27,22 @@ async function create(req, res, next) {
 async function get(req, res, next) {
 
   const product = await productModel.find().populate('category', '-__v')
-  return res.json({ message: product})
+  return res.json(product)
+}
+
+async function getDetail(req, res, next) {
+  const {id} = req.params
+  const product = await productModel.find({_id: id}).populate('category', '-__v')
+  if(!product) {
+    return res.status(400).json({message: 'Product not found'});
+  }
+
+  return res.json(product[0])
 }
 
 
 module.exports = {
   create: create,
-  get: get
+  get: get,
+  getDetail: getDetail
 }
